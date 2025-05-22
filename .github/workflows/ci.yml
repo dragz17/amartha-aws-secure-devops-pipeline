@@ -27,7 +27,7 @@ jobs:
         projectBaseDir: .
         args: >
           -Dsonar.organization=secure-devops-pipeline
-          -Dsonar.projectKey=amartha-devsecops
+          -Dsonar.projectKey=secure-devops-pipeline
           -Dsonar.sources=src/
 
     - name: Run OWASP Dependency Check
