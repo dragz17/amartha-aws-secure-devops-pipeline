@@ -19,8 +19,22 @@ jobs:
         node-version: '20'
         cache: 'npm'
 
+    - name: Load Security Config Exclusions
+      run: |
+        EXCLUSIONS_PATHS=$(jq -r '.security.exclusions.paths[]' config/security-config.json | paste -sd, -)
+        EXCLUSIONS_VULNS=$(jq -r '.security.exclusions.vulnerabilities[]?' config/security-config.json | paste -sd, -)
+        DEPCHECK_ENABLED=$(jq -r '.security.dependencyCheck.enabled' config/security-config.json)
+        SAST_ENABLED=$(jq -r '.security.staticAnalysis.enabled' config/security-config.json)
+        
+        echo "SECURITY_EXCLUSIONS_PATHS=${EXCLUSIONS_PATHS}" >> $GITHUB_ENV
+        echo "SECURITY_EXCLUSIONS_VULNS=${EXCLUSIONS_VULNS}" >> $GITHUB_ENV
+        echo "DEPCHECK_ENABLED=${DEPCHECK_ENABLED}" >> $GITHUB_ENV
+        echo "SAST_ENABLED=${SAST_ENABLED}" >> $GITHUB_ENV
+      shell: bash
+
     - name: SonarCloud Scan
       uses: SonarSource/sonarcloud-github-action@v2.1.1
+      if: ${{ env.SAST_ENABLED == 'true' }}
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       with:
@@ -29,15 +43,17 @@ jobs:
           -Dsonar.organization=secure-devops-pipeline
           -Dsonar.projectKey=secure-devops-pipeline
           -Dsonar.sources=src/
+          -Dsonar.exclusions=${{ env.SECURITY_EXCLUSIONS_PATHS }}
 
     - name: Run OWASP Dependency Check
       uses: dependency-check/Dependency-Check_Action@main
+      if: ${{ env.DEPCHECK_ENABLED == 'true' }}
       with:
         project: 'amartha-devsecops'
         path: '.' # Scan the entire repository directory
         format: 'HTML'
         out: 'owasp-reports' # Output directory for reports
-        args: '--failOnCVSS 7' # Fail on HIGH or CRITICAL vulnerabilities
+        args: '--failOnCVSS 7 --excludeCve ${{ env.SECURITY_EXCLUSIONS_VULNS }}' # Fail on HIGH or CRITICAL vulnerabilities, exclude specified CVEs
 
     - name: Upload Dependency Check Report
       uses: actions/upload-artifact@v4
@@ -73,6 +89,7 @@ jobs:
         format: 'json'
         output: 'trivy-results.json'
         severity: 'CRITICAL,HIGH' # Fail on HIGH or CRITICAL vulnerabilities
+        args: '--exclude-vulnerability ${{ env.SECURITY_EXCLUSIONS_VULNS }}'
 
     - name: Upload Trivy Scan Report
       uses: actions/upload-artifact@v4
@@ -88,7 +105,7 @@ jobs:
         webhook-type: 'incoming-webhook'
         payload: |
           {
-            "text": "CI/CD Pipeline Run ${{ github.run_number }} status: ${{ job.status }}.\nRepository: ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\nCheck workflow run here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nOWASP Dependency Check Report: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/dependency-check-report|View Report>\nTrivy Scan Report: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/trivy-scan-report|View Report>"
+            "text": "CI/CD Pipeline Run ${{ github.run_number }} status: ${{ job.status }}.\\nRepository: ${{ github.repository }}\\nBranch: ${{ github.ref_name }}\\nCommit: ${{ github.sha }}\\nCheck workflow run and view reports here: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run & Artifacts>"
           }
 
     # Next steps will go here 

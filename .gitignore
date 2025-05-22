@@ -55,5 +55,3 @@ bitbucket-pipelines.yml
 # Security reports
 security-reports/
 .scannerwork/
-
-

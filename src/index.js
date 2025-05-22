@@ -1,1 +1,1 @@
-console.log('Hello from Amartha DevSecOps Sample!');
+console.log('Hello World!');
