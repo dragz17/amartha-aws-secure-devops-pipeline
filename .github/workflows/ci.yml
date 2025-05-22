@@ -48,8 +48,8 @@ jobs:
       with:
         projectBaseDir: .
         args: >
-          -Dsonar.organization=secure-devops-pipeline
-          -Dsonar.projectKey=secure-devops-pipeline
+          -Dsonar.organization=github-devsecops-pipeline
+          -Dsonar.projectKey=github-devsecops-pipeline
           -Dsonar.sources=.
           -Dsonar.exclusions=${{ env.SECURITY_EXCLUSIONS_PATHS }}
           -Dsonar.nodejs.executable=${{ env.NODE_EXEC_PATH }}
@@ -112,9 +112,6 @@ jobs:
       with:
         webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
         webhook-type: 'incoming-webhook'
-        payload: |
-          {
-            "text": "CI/CD Pipeline Run ${{ github.run_number }} status: ${{ job.status }}.\\nRepository: ${{ github.repository }}\\nBranch: ${{ github.ref_name }}\\nCommit: ${{ github.sha }}\\nCheck workflow run and view reports here: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run & Artifacts>"
-          }
+        payload: "{\"text\": \"CI/CD Pipeline Run ${{ github.run_number }} status: ${{ job.status }}.\\nRepository: ${{ github.repository }}.\\nBranch: ${{ github.ref_name }}.\\nCommit: ${{ github.sha }}.\\nCheck workflow run and view reports here: <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run & Artifacts>\"}"
 
     # Next steps will go here 
