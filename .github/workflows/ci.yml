@@ -85,6 +85,7 @@ jobs:
       if: always() # Run this step even if previous steps fail
       with:
         webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+        webhook-type: 'incoming-webhook'
         payload: |
           {
             "text": "CI/CD Pipeline Run ${{ github.run_number }} status: ${{ job.status }}.\nRepository: ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\nCheck workflow run here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nOWASP Dependency Check Report available as artifact.\nTrivy Scan Report available as artifact."
