@@ -81,7 +81,7 @@ jobs:
         path: trivy-results.json
 
     - name: Send Slack Notification
-      uses: slackapi/slack-notify-action@v1
+      uses: slackapi/slack-github-action@v2.1.0
       if: always() # Run this step even if previous steps fail
       with:
         status: ${{ job.status }} # Pass the status of the job (success, failure, etc.)
