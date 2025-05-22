@@ -85,7 +85,7 @@ jobs:
       if: always() # Run this step even if previous steps fail
       with:
         status: ${{ job.status }} # Pass the status of the job (success, failure, etc.)
-        slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
         payload: |
           {
             "text": "CI/CD Pipeline Run ${{ github.run_number }} status: ${{ job.status }}.\nRepository: ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\nCheck workflow run here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nOWASP Dependency Check Report available as artifact.\nTrivy Scan Report available as artifact."
