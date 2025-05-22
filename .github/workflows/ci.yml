@@ -44,6 +44,7 @@ jobs:
           -Dsonar.projectKey=secure-devops-pipeline
           -Dsonar.sources=src/
           -Dsonar.exclusions=${{ env.SECURITY_EXCLUSIONS_PATHS }}
+          -Dsonar.nodejs.executable=node
 
     - name: Run OWASP Dependency Check
       uses: dependency-check/Dependency-Check_Action@main
@@ -53,7 +54,7 @@ jobs:
         path: '.' # Scan the entire repository directory
         format: 'HTML'
         out: 'owasp-reports' # Output directory for reports
-        args: '--failOnCVSS 7 --excludeCve ${{ env.SECURITY_EXCLUSIONS_VULNS }}' # Fail on HIGH or CRITICAL vulnerabilities, exclude specified CVEs
+        args: '--failOnCVSS 7' # Fail on HIGH or CRITICAL vulnerabilities
 
     - name: Upload Dependency Check Report
       uses: actions/upload-artifact@v4
