@@ -26,9 +26,9 @@ jobs:
       with:
         projectBaseDir: .
         args: >
-          -Dsonar.organization=secure-devops-pipeline # Replace with your SonarCloud organization key
-          -Dsonar.projectKey=amartha-devsecops # Replace with your SonarCloud project key
-          -Dsonar.sources=src/ # Adjust source directory if needed
+          -Dsonar.organization=secure-devops-pipeline
+          -Dsonar.projectKey=amartha-devsecops
+          -Dsonar.sources=src/
 
     - name: Run OWASP Dependency Check
       uses: dependency-check/Dependency-Check_Action@main
