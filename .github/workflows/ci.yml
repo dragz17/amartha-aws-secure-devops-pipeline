@@ -24,6 +24,9 @@ jobs:
         echo "NODE_EXEC_PATH=$(which node)" >> $GITHUB_ENV
       shell: bash
 
+    - name: Install Dependencies
+      run: npm ci
+
     - name: Load Security Config Exclusions
       run: |
         EXCLUSIONS_PATHS=$(jq -r '.security.exclusions.paths[]' config/security-config.json | paste -sd, -)
@@ -47,7 +50,7 @@ jobs:
         args: >
           -Dsonar.organization=secure-devops-pipeline
           -Dsonar.projectKey=secure-devops-pipeline
-          -Dsonar.sources=src/
+          -Dsonar.sources=.
           -Dsonar.exclusions=${{ env.SECURITY_EXCLUSIONS_PATHS }}
           -Dsonar.nodejs.executable=${{ env.NODE_EXEC_PATH }}
 
