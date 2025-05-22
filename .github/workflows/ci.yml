@@ -1,0 +1,94 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@v2.1.1
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        projectBaseDir: .
+        args: >
+          -Dsonar.organization=secure-devops-pipeline # Replace with your SonarCloud organization key
+          -Dsonar.projectKey=amartha-devsecops # Replace with your SonarCloud project key
+          -Dsonar.sources=src/ # Adjust source directory if needed
+
+    - name: Run OWASP Dependency Check
+      uses: dependency-check/Dependency-Check_Action@main
+      with:
+        project: 'amartha-devsecops'
+        path: '.' # Scan the entire repository directory
+        format: 'HTML'
+        out: 'owasp-reports' # Output directory for reports
+        args: '--failOnCVSS 7' # Fail on HIGH or CRITICAL vulnerabilities
+
+    - name: Upload Dependency Check Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: dependency-check-report
+        path: owasp-reports/dependency-check-report.html
+
+    - name: Run Security Unit Tests
+      run: npm run test:security
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: true
+        tags: |
+          ${{ secrets.DOCKER_USERNAME }}/amartha-devsecops-sample:${{ github.run_number }}
+          ${{ secrets.DOCKER_USERNAME }}/amartha-devsecops-sample:latest
+
+    - name: Run Trivy Scan on Docker Image
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ secrets.DOCKER_USERNAME }}/amartha-devsecops-sample:latest
+        format: 'json'
+        output: 'trivy-results.json'
+        severity: 'CRITICAL,HIGH' # Fail on HIGH or CRITICAL vulnerabilities
+
+    - name: Upload Trivy Scan Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: trivy-scan-report
+        path: trivy-results.json
+
+    - name: Send Slack Notification
+      uses: slackapi/slack-notify-action@v1
+      if: always() # Run this step even if previous steps fail
+      with:
+        status: ${{ job.status }} # Pass the status of the job (success, failure, etc.)
+        slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+        payload: |
+          {
+            "text": "CI/CD Pipeline Run ${{ github.run_number }} status: ${{ job.status }}.\nRepository: ${{ github.repository }}\nBranch: ${{ github.ref_name }}\nCommit: ${{ github.sha }}\nCheck workflow run here: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\nOWASP Dependency Check Report available as artifact.\nTrivy Scan Report available as artifact."
+          }
+
+    # Next steps will go here 

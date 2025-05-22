@@ -1,0 +1,30 @@
+# Node modules (should not be copied, always install in image)
+node_modules
+npm-debug.log
+
+# Test & dev files
+.tests
+/tests
+security-reports
+.scannerwork
+
+# VCS & CI/CD
+.git
+.gitignore
+bitbucket-pipelines.yml
+docker-compose.yml
+
+# Documentation
+README.md
+*.md
+
+# Local config & secrets
+sonar.properties
+config/security-config.json
+
+# Docker & build
+Dockerfile
+.dockerignore
+
+# Misc
+*.log 

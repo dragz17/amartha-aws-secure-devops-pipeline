@@ -1,0 +1,49 @@
+{
+  "security": {
+    "vulnerabilityThresholds": {
+      "critical": 0,
+      "high": 3,
+      "medium": 5,
+      "low": 10
+    },
+    "exclusions": {
+      "paths": [
+        "node_modules/**",
+        "dist/**",
+        "tests/**"
+      ],
+      "vulnerabilities": [
+        "CVE-2023-1234",
+        "CVE-2023-5678"
+      ]
+    },
+    "notifications": {
+      "email": {
+        "enabled": true,
+        "recipients": [],
+        "threshold": "high"
+      },
+      "slack": {
+        "enabled": true,
+        "webhook": "",
+        "channel": "#security-alert",
+        "threshold": "high"
+      }
+    },
+    "containerSecurity": {
+      "baseImageScan": true,
+      "runtimeScan": true,
+      "registryScan": true
+    },
+    "dependencyCheck": {
+      "enabled": true,
+      "updateInterval": "24h",
+      "failOnVulnerability": true
+    },
+    "staticAnalysis": {
+      "enabled": true,
+      "tools": ["sonarqube", "eslint-security-plugin"],
+      "failOnIssues": true
+    }
+  }
+} 
