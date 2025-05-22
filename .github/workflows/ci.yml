@@ -19,6 +19,11 @@ jobs:
         node-version: '20'
         cache: 'npm'
 
+    - name: Get Node.js Executable Path
+      run: |
+        echo "NODE_EXEC_PATH=$(which node)" >> $GITHUB_ENV
+      shell: bash
+
     - name: Load Security Config Exclusions
       run: |
         EXCLUSIONS_PATHS=$(jq -r '.security.exclusions.paths[]' config/security-config.json | paste -sd, -)
@@ -44,7 +49,7 @@ jobs:
           -Dsonar.projectKey=secure-devops-pipeline
           -Dsonar.sources=src/
           -Dsonar.exclusions=${{ env.SECURITY_EXCLUSIONS_PATHS }}
-          -Dsonar.nodejs.executable=node
+          -Dsonar.nodejs.executable=${{ env.NODE_EXEC_PATH }}
 
     - name: Run OWASP Dependency Check
       uses: dependency-check/Dependency-Check_Action@main
