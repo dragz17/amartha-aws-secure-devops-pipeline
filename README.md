@@ -9,36 +9,23 @@ This repository contains a DevSecOps pipeline implementation that integrates sec
 - Dependency vulnerability checking (OWASP Dependency-Check)
 - Container security scanning (Trivy)
 - Security unit tests
-- Configurable security thresholds
 - Automated notifications (Slack)
 
 ## Prerequisites
 
 - Node.js 18 or higher
 - Docker (Colima/Docker Desktop)
-- Bitbucket account
+- GitHub account
 - SonarCloud account
-
-## Required Environment Variables
-
-```bash
-# SonarCloud
-SONAR_HOST_URL=https://sonarcloud.io
-SONAR_TOKEN=your_sonarcloud_token
-
-# Docker
-DOCKER_IMAGE=your_docker_image_name
-
-# Notifications
-SLACK_WEBHOOK_URL=your_slack_webhook_url
-```
+- NVD API key
+- Container Registry
 
 ## Setup
 
 1. Clone the repository:
    ```bash
-   git clone https://bitbucket.org/your-org/amartha-devsecops-sample.git
-   cd amartha-devsecops-sample
+   git clone https://github.com/dragz17/amartha-secure-devops-pipeline.git
+   cd amartha-secure-devops-pipeline
    ```
 
 2. Install dependencies:
@@ -50,15 +37,13 @@ SLACK_WEBHOOK_URL=your_slack_webhook_url
    - Edit `config/security-config.json` to customize security thresholds and notifications
    - Update `.gitignore` and `.dockerignore` to exclude sensitive files
 
-4. Set up Bitbucket Pipeline:
-   - Enable Bitbucket Pipelines in your repository settings
-   - Add required environment variables in repository settings
+4. Set up GitHub:
+   - Add required secrets in repository settings
 
 ## Security Tools Integration
 
 ### Static Code Analysis
 - SonarCloud for code quality and security
-- ESLint with security plugins
 
 ### Dependency Checking
 - OWASP Dependency-Check
@@ -79,17 +64,6 @@ SLACK_WEBHOOK_URL=your_slack_webhook_url
    - Docker image build
    - Application build
 
-## Security Configuration
-
-The security configuration can be customized in `config/security-config.json`:
-
-- Vulnerability thresholds
-- Excluded paths and vulnerabilities
-- Notification settings
-- Container security options
-- Dependency check settings
-- Static analysis configuration
-
 ## Running Security Tests
 
 ```bash
@@ -104,13 +78,21 @@ The pipeline sends notifications for:
 - High severity issues
 - Failed security checks
 
-## Contributing
+## Output
 
-1. Create a feature branch
-2. Make your changes
-3. Run security tests
-4. Submit a pull request
+- Static Code Analysis
+![Sonarcloud](images/ss1_sonarcloud.jpg)
+- Dependency Check
+![OWASP Dependency Check](images/ss2_dependencycheck.jpg)
+- Security Unit Test
+![Security Unit Test](images/ss3_securityunit.jpg)
+- Container Scanning
+![Container Scanning](images/ss4_container-scanning.jpg)
+- Slack Notification
+![Slack Notification](images/ss5_slacknotification.jpg)
+- Scan failed to pass
+![Failed to Pass](images/ss6a_failure.jpg)
+![Failed to Pass](images/ss6b_failure.jpg)
 
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+## Thank You
+Regards, Boy Suganda Sinaga
