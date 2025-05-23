@@ -82,22 +82,25 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Build and push Docker image
+    - name: Build Docker image
+      id: docker_build
       uses: docker/build-push-action@v5
       with:
         context: .
-        push: true
+        push: false
+        load: true
         tags: |
           ${{ secrets.DOCKER_USERNAME }}/amartha-devsecops-sample:${{ github.run_number }}
           ${{ secrets.DOCKER_USERNAME }}/amartha-devsecops-sample:latest
 
     - name: Run Trivy Scan on Docker Image
+      id: trivy_scan
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: ${{ secrets.DOCKER_USERNAME }}/amartha-devsecops-sample:latest
         format: 'json'
         output: 'trivy-results.json'
-        severity: 'CRITICAL,HIGH' # Fail on HIGH or CRITICAL vulnerabilities
+        severity: 'CRITICAL,HIGH'
         args: '--exclude-vulnerability ${{ env.SECURITY_EXCLUSIONS_VULNS }}'
 
     - name: Upload Trivy Scan Report
@@ -106,9 +109,15 @@ jobs:
         name: trivy-scan-report
         path: trivy-results.json
 
+    - name: Push Docker Image to Registry
+      if: steps.trivy_scan.conclusion == 'success'
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/amartha-devsecops-sample:${{ github.run_number }}
+        docker push ${{ secrets.DOCKER_USERNAME }}/amartha-devsecops-sample:latest
+
     - name: Send Slack Notification
       uses: slackapi/slack-github-action@v2.1.0
-      if: always() # Run this step even if previous steps fail
+      if: always()
       with:
         webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
         webhook-type: 'incoming-webhook'

@@ -26,6 +26,29 @@ describe('Security Tests', () => {
             const audit = JSON.parse(stdout);
             console.error("npm audit found vulnerabilities:");
             console.error(stdout);
+
+            console.error("\n--- Summary of Critical/High Vulnerabilities ---");
+            let foundRelevant = false;
+            if (audit.vulnerabilities) {
+                for (const packageName in audit.vulnerabilities) {
+                    if (audit.vulnerabilities.hasOwnProperty(packageName)) {
+                        const vulnInfo = audit.vulnerabilities[packageName];
+                        for (const vulnerability of vulnInfo.via) {
+                            // Check if vulnerability object and severity is critical or high
+                             if (typeof vulnerability === 'object' && (vulnerability.severity === 'critical' || vulnerability.severity === 'high')) {
+                                foundRelevant = true;
+                                console.error(`- [${vulnerability.severity.toUpperCase()}] Package: ${packageName}, Path: ${vulnInfo.findRoot}, ID: ${vulnerability.cve || vulnerability.url || 'N/A'}`);
+                            }
+                        }
+                    }
+                }
+            }
+            if (!foundRelevant) {
+                console.error("No Critical or High vulnerabilities found requiring immediate attention.");
+            }
+            console.error("----------------------------------------------\n");
+            // --- END: Added code for summary ---
+
             expect(audit.vulnerabilities).to.be.empty;
             done(new Error('npm audit found vulnerabilities'));
           } catch (parseError) {
