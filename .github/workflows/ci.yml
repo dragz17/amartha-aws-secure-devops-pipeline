@@ -40,6 +40,14 @@ jobs:
         echo "SAST_ENABLED=${SAST_ENABLED}" >> $GITHUB_ENV
       shell: bash
 
+    - name: Create .trivyignore file
+      if: ${{ env.SECURITY_EXCLUSIONS_VULNS != '' }}
+      run: |
+        echo "${{ env.SECURITY_EXCLUSIONS_VULNS }}" | tr ',' '\n' > .trivyignore
+        echo "Generated .trivyignore content:"
+        cat .trivyignore
+      shell: bash
+
     - name: SonarCloud Scan
       uses: SonarSource/sonarqube-scan-action@v5.2.0
       if: ${{ env.SAST_ENABLED == 'true' }}
@@ -101,7 +109,6 @@ jobs:
         format: 'json'
         output: 'trivy-results.json'
         severity: 'CRITICAL,HIGH'
-        args: '--exclude-vulnerability ${{ env.SECURITY_EXCLUSIONS_VULNS }}'
 
     - name: Upload Trivy Scan Report
       uses: actions/upload-artifact@v4
